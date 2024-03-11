@@ -1,0 +1,56 @@
+import pygame
+import math
+import time
+
+# Pygame setup
+pygame.init()
+screen = pygame.display.set_mode((800, 600))
+clock = pygame.time.Clock()
+
+class Eye:
+    def __init__(self, x, y, radius):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.eyeball_radius = radius // 4
+        self.eyeball_position = (x, y)
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, (255, 255, 255), (self.x, self.y), self.radius)
+        pygame.draw.circle(screen, (0, 0, 0), self.eyeball_position, self.eyeball_radius)
+
+    def follow(self, x, y):
+        dx = x - self.x
+        dy = y - self.y
+        distance = math.sqrt(dx**2 + dy**2)
+        if distance < self.radius - self.eyeball_radius:
+            self.eyeball_position = (x, y)
+        else:
+            ratio = (self.radius - self.eyeball_radius) / distance
+            new_x = self.x + dx * ratio
+            new_y = self.y + dy * ratio
+            self.eyeball_position = (int(new_x), int(new_y))
+
+eye = Eye(400, 300, 100)
+blink_time = pygame.time.get_ticks() + 2000
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    screen.fill((0, 0, 0))
+
+    if pygame.time.get_ticks() >= blink_time:
+        eye = Eye(400, 300, 100)
+        blink_time = pygame.time.get_ticks() + 2000
+
+    x, y = pygame.mouse.get_pos()
+    eye.follow(x, y)
+    eye.draw(screen)
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
